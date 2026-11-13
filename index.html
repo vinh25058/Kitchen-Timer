@@ -1,0 +1,583 @@
+<div class="timer-container">
+  <!-- Thân máy đồng hồ / タイマーの本体 -->
+  <div class="kitchen-timer">
+    
+    <!-- Tên thương hiệu / ブランドロゴ -->
+    <div class="brand-logo">VINH</div>
+
+    <!-- Màn hình điện tử / 液晶画面 -->
+    <div class="lcd-display" id="lcdDisplay">
+      <div class="lcd-bg-digits">88:88</div>
+      <div class="lcd-time" id="timeDisplay">00:00</div>
+    </div>
+
+    <!-- Chú thích nút reset -->
+    <div class="reset-bridge">
+      <span class="reset-text">Reset (Q + W)</span>
+      <div class="bridge-line"></div>
+    </div>
+
+    <!-- Hệ thống nút bấm / ボタンエリア -->
+    <div class="button-group">
+      <button class="timer-btn" id="minBtn" data-type="min">
+        <span class="btn-label">MIN</span>
+        <span class="shortcut-key">Q</span>
+      </button>
+      <button class="timer-btn" id="secBtn" data-type="sec">
+        <span class="btn-label">SEC</span>
+        <span class="shortcut-key">W</span>
+      </button>
+      <button class="timer-btn btn-start-stop" id="startStopBtn">
+        <span class="btn-label" id="startStopLabel">START</span>
+        <span class="shortcut-key">E</span>
+      </button>
+    </div>
+
+  </div>
+</div>
+
+// Tải Font DSEG7 từ CDN để hiển thị số điện tử
+@font-face {
+  font-family: 'DSEG7-Classic';
+  src: url('https://cdn.jsdelivr.net/npm/dseg/fonts/DSEG7-Classic/DSEG7Classic-Regular.woff2') format('woff2');
+  font-weight: normal;
+  font-style: normal;
+}
+
+// Định nghĩa màu sắc / カラー変数
+$body-bg: #e0e0e0;
+$timer-body-color: #1a1a1a; // Màu đen hiện đại
+$lcd-bg-color: #243224;     // Màu nền xanh LCD mờ
+$lcd-text-color: #33ff33;   // Màu LED xanh sáng
+$lcd-bg-digits-color: rgba(51, 255, 51, 0.06); // Số mờ phía sau
+$btn-bg: #2b2b2b;
+$btn-text: #ffffff;
+$accent-line: #555555;
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  background-color: $body-bg;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  padding: 20px;
+}
+
+.timer-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+  max-width: 340px;
+}
+
+// Đường kẻ và hướng dẫn Reset / リセットの案内線
+.reset-bridge {
+  align-self: flex-start;
+  margin-left: 35px;            // Tọa độ căn giữa chuẩn xác theo tâm của 2 nút
+  width: 90px;
+  margin-bottom: 12px;
+  text-align: center;
+  
+  .reset-text {
+    font-size: 11px;
+    color: #888;
+    font-weight: bold;
+    letter-spacing: 0.5px;
+  }
+
+  .bridge-line {
+    height: 2px;
+    background: $accent-line;
+    margin-top: 4px;
+    position: relative;
+
+    &::before, &::after {
+      content: '';
+      position: absolute;
+      top: 0;
+      width: 2px;
+      height: 6px;
+      background: $accent-line;
+    }
+    &::before { left: 0; }
+    &::after { right: 0; }
+  }
+}
+
+// Thân máy đồng hồ hình vuông bo tròn (Skeuomorphism)
+.kitchen-timer {
+  width: 300px;
+  height: 300px;
+  background-color: $timer-body-color;
+  border-radius: 36px;
+  padding: 25px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  align-items: center;
+  
+  // Đổ bóng đa tầng tạo chiều sâu chân thật
+  box-shadow: 
+    15px 15px 30px rgba(0, 0, 0, 0.4), 
+    -10px -10px 20px rgba(255, 255, 255, 0.6),
+    inset 2px 2px 5px rgba(255, 255, 255, 0.15),
+    inset -2px -2px 5px rgba(0, 0, 0, 0.7);
+  position: relative;
+}
+
+// Logo mang thương hiệu riêng
+.brand-logo {
+  color: #d4af37; // Màu vàng kim giả kim loại
+  font-weight: 900;
+  font-size: 18px;
+  letter-spacing: 3px;
+  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.8);
+  margin-top: 5px;
+}
+
+// Màn hình hiển thị LCD nhị phân
+.lcd-display {
+  width: 100%;
+  height: 85px;
+  background-color: $lcd-bg-color;
+  border-radius: 12px;
+  position: relative;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  border: 4px solid #111;
+  box-shadow: inset 4px 4px 8px rgba(0, 0, 0, 0.8);
+  overflow: hidden;
+
+  // Hiệu ứng nhấp nháy khi kết thúc / 終了時の点滅アニメーション
+  &.flash-active {
+    animation: lcd-blink 0.4s infinite alternate;
+  }
+}
+
+.lcd-bg-digits, .lcd-time {
+  font-family: 'DSEG7-Classic', monospace;
+  font-size: 48px;
+  letter-spacing: 2px;
+  position: absolute;
+  user-select: none;
+}
+
+.lcd-bg-digits {
+  color: $lcd-bg-digits-color;
+}
+
+.lcd-time {
+  color: $lcd-text-color;
+  text-shadow: 0 0 10px rgba(51, 255, 51, 0.6);
+}
+
+// Khu vực các nút bấm lớn
+.button-group {
+  display: flex;
+  justify-content: space-between;
+  width: 100%;
+  gap: 15px;
+  margin-bottom: 5px;
+}
+
+// Thiết kế nút bấm nổi khối cơ học
+.timer-btn {
+  flex: 1;
+  height: 65px;
+  background: $btn-bg;
+  color: $btn-text;
+  border: none;
+  border-radius: 16px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  cursor: pointer;
+  box-shadow: 
+    0 5px 0 #000, 
+    3px 6px 10px rgba(0, 0, 0, 0.5),
+    inset 1px 1px 2px rgba(255, 255, 255, 0.1);
+  transition: all 0.1s ease;
+  position: relative;
+
+  &:active, &.active-click {
+    transform: translateY(4px);
+    box-shadow: 
+      0 1px 0 #000, 
+      1px 2px 5px rgba(0, 0, 0, 0.5);
+  }
+
+  &:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    transform: none !important;
+    box-shadow: 0 5px 0 #000, 3px 6px 10px rgba(0, 0, 0, 0.5) !important;
+  }
+
+  .btn-label {
+    font-size: 14px;
+    font-weight: bold;
+    letter-spacing: 1px;
+  }
+
+  .shortcut-key {
+    font-size: 10px;
+    color: #888;
+    margin-top: 2px;
+    font-weight: bold;
+    background: rgba(0,0,0,0.3);
+    padding: 1px 5px;
+    border-radius: 4px;
+  }
+}
+
+// Tạo điểm nhấn khác biệt cho nút Start/Stop
+.btn-start-stop {
+  background: #3a5fcd;
+  
+  &:active, &.active-click {
+    background: #2b4bb7;
+  }
+}
+
+// Định nghĩa hiệu ứng chớp tắt màn hình LCD
+@keyframes lcd-blink {
+  0% { opacity: 1; }
+  100% { opacity: 0.1; }
+}
+
+// ==========================================
+// 1. QUẢN LÝ TRẠNG THÁI / 状態管理（じょうたいかんり）
+// ==========================================
+let currentTime = 0;       // Thời gian hiện tại (giây) / 現在の残り時間（秒）
+let initialSetTime = 0;    // Bộ nhớ lưu thời gian gốc / 前回の設定時間（メモリーリコール用）
+let isRunning = false;     // Trạng thái đếm ngược / カウントダウン中フラグ
+let isFlashing = false;    // Trạng thái nhấp nháy khi về 0 / 終了時タイマー点滅フラグ
+
+// Khai báo các biến Timer ID / タイマーID変数
+let countdownInterval = null;
+let flashTimeout = null;
+let flashInterval = null;
+
+// Quản lý tương tác nhấn giữ (Long Press) / 長押し制御用の変数
+let pressTimeout = null;
+let pressInterval = null;
+const LONG_PRESS_DELAY = 500;  // Thời gian kích hoạt nhấn giữ (0.5 giây) / 長押し判定までの時間（0.5秒）
+const LONG_PRESS_SPEED = 150;  // Tốc độ nhảy số liên tục (0.15 giây) / 長押し時の増加スピード（0.15秒）
+
+// Quản lý Reset bằng chuột trên PC (0.3 giây) / マウスでの同時押しエミュレート用の変数
+let lastMinClickTime = 0;
+let lastSecClickTime = 0;
+const MOUSE_RESET_WINDOW = 300; 
+
+// Các phím tắt đang được nhấn giữ trên bàn phím / 押されているキーの管理
+const activeKeys = {};
+
+// Truy vấn các phần tử DOM / DOM要素の取得
+const timeDisplay = document.getElementById('timeDisplay');
+const lcdDisplay = document.getElementById('lcdDisplay');
+const minBtn = document.getElementById('minBtn');
+const secBtn = document.getElementById('secBtn');
+const startStopBtn = document.getElementById('startStopBtn');
+const startStopLabel = document.getElementById('startStopLabel');
+
+// ==========================================
+// 2. HÀM XỬ LÝ LÕI / コア機能の関数（かんすう）
+// ==========================================
+
+// Cập nhật giao diện màn hình điện tử / 液晶画面の表示更新（ひょうじこうしん）
+function updateDisplay() {
+  const minutes = Math.floor(currentTime / 60);
+  const seconds = currentTime % 60;
+  const mm = String(minutes).padStart(2, '0');
+  const ss = String(seconds).padStart(2, '0');
+  timeDisplay.textContent = `${mm}:${ss}`;
+}
+
+// Logic tăng thời gian (+1 phút/+1 giây, hoặc +10 khi nhấn giữ, hoặc cộng dồn khi đang chạy)
+// 時間を増やすロジック（通常時、カウントダウン中、長押し時の挙動制御）
+function incrementTime(type, amount = 1) {
+  if (isFlashing) return; // Chặn chỉnh thời gian khi đang nhấp nháy báo hiệu / 点滅中は操作無効
+
+  if (isRunning) {
+    // A. KHI ĐANG ĐẾM NGƯỢC (Cộng thêm thời gian mà không dừng đếm)
+    // カウントダウン中の時間追加（タイマーは止めない）
+    if (type === 'min') {
+      if (amount === 1) {
+        currentTime += 60; // Thêm 1 phút (60 giây) / 1分（60秒）追加
+      } else {
+        currentTime += amount * 60; // Nhấn giữ: thêm 10 phút / 長押し時：10分追加
+      }
+    } else if (type === 'sec') {
+      if (amount === 1) {
+        currentTime += 10; // Thêm 10 giây / 10秒追加
+      } else {
+        currentTime += amount; // Nhấn giữ: thêm 10 giây / 長押し時：10秒追加
+      }
+    }
+  } else {
+    // B. KHI KHÔNG ĐẾM NGƯỢC (Trạng thái chờ hoặc tạm dừng - Giữ nguyên logic cũ)
+    // 通常時（停止中・待機中）の時間設定（初期の仕様を維持）
+    if (type === 'min') {
+      currentTime += amount * 60;
+    } else if (type === 'sec') {
+      if (amount === 1) {
+        let currentSec = currentTime % 60;
+        let currentMin = Math.floor(currentTime / 60);
+        currentSec = (currentSec + 1) % 60;
+        currentTime = (currentMin * 60) + currentSec;
+      } else {
+        currentTime += amount;
+      }
+    }
+  }
+
+  // Giới hạn thời gian tối đa: 99 phút 59 giây (5999 giây)
+  // 最大時間の制限（99分59秒 ＝ 5999秒）
+  if (currentTime > 5999) {
+    currentTime = 5999;
+  }
+  updateDisplay();
+}
+
+// Cơ chế kích hoạt Bắt đầu / Tạm dừng / スタート・ストップの切り替え
+function toggleStartStop() {
+  if (isFlashing) {
+    stopFlashingAndRecall();
+    return;
+  }
+
+  if (isRunning) {
+    // Tạm dừng bộ đếm / 一時停止（いちじていし）
+    clearInterval(countdownInterval);
+    isRunning = false;
+    startStopLabel.textContent = 'START';
+  } else {
+    // Kiểm tra điều kiện biên 00:00 / 00:00の時はスタートしない
+    if (currentTime === 0) return;
+
+    // Ghi nhớ mốc thời gian nếu bắt đầu chạy từ đầu / 初回スタート時に設定時間を記憶
+    if (initialSetTime === 0 || minBtn.disabled === false) {
+      initialSetTime = currentTime;
+    }
+
+    // Bắt đầu đếm ngược / カウントダウン開始（かいし）
+    isRunning = true;
+    startStopLabel.textContent = 'STOP';
+
+    countdownInterval = setInterval(() => {
+      if (currentTime > 0) {
+        currentTime--;
+        updateDisplay();
+      } else {
+        // Khi chạm mức số 00:00 -> Kích hoạt báo hiệu / 00:00になったら点滅開始
+        clearInterval(countdownInterval);
+        isRunning = false;
+        startStopLabel.textContent = 'START';
+        triggerEndFlashing();
+      }
+    }, 1000);
+  }
+}
+
+// Thao tác Đặt lại toàn bộ (Reset) / タイマーのリセット処理
+function resetTimer() {
+  clearInterval(countdownInterval);
+  clearTimeout(flashTimeout);
+  clearInterval(flashInterval);
+  
+  currentTime = 0;
+  initialSetTime = 0;
+  isRunning = false;
+  isFlashing = false;
+  
+  lcdDisplay.classList.remove('flash-active');
+  startStopLabel.textContent = 'START';
+  
+  updateDisplay();
+  enableAdjustmentButtons();
+}
+
+// Kích hoạt nhấp nháy màn hình LCD trong 3 giây khi kết thúc / 終了時の3秒間点滅処理
+function triggerEndFlashing() {
+  isFlashing = true;
+  lcdDisplay.classList.add('flash-active');
+  disableAdjustmentButtons(); // Khóa nút bấm khi đang nhấp nháy báo hiệu / 点滅中のみボタンをロック
+
+  // Tự động tắt nhấp nháy sau 3 giây và khôi phục thời gian cũ / 3秒後に自動停止してメモリから時間を復元
+  flashTimeout = setTimeout(() => {
+    stopFlashingAndRecall();
+  }, 3000);
+}
+
+// Tắt nhấp nháy màn hình và khôi phục thời gian cài đặt trước đó / 点滅を止めて前回の設定時間に戻す
+function stopFlashingAndRecall() {
+  clearTimeout(flashTimeout);
+  lcdDisplay.classList.remove('flash-active');
+  isFlashing = false;
+  
+  currentTime = initialSetTime; // Trả về thời gian đặt trước đó / メモリーリコール
+  updateDisplay();
+  enableAdjustmentButtons();
+}
+
+// Khóa nút bấm / ボタンを無効化（むこうか）する
+function disableAdjustmentButtons() {
+  minBtn.disabled = true;
+  secBtn.disabled = true;
+}
+
+// Mở khóa nút bấm / ボタンを有効化（ゆうこうか）する
+function enableAdjustmentButtons() {
+  minBtn.disabled = false;
+  secBtn.disabled = false;
+}
+
+// ==========================================
+// 3. XỬ LÝ NHẤN GIỮ (LONG PRESS) & RESET CHUỘT
+//    長押し処理（ながおし）とマウスでのリセット検知
+// ==========================================
+
+function startLongPressCounter(type) {
+  if (isFlashing) return;
+  
+  // Thực hiện cộng phát đầu tiên / 1回目の増加
+  incrementTime(type, 1);
+  
+  // Thiết lập chờ sau 0.5s để kích hoạt chế độ nhảy liên tục (+10 đơn vị)
+  // 0.5秒押し続けたら、0.15秒間隔で連続増加（+10ずつ）を開始
+  pressTimeout = setTimeout(() => {
+    pressInterval = setInterval(() => {
+      incrementTime(type, 10);
+    }, LONG_PRESS_SPEED);
+  }, LONG_PRESS_DELAY);
+}
+
+function stopLongPressCounter() {
+  clearTimeout(pressTimeout);
+  clearInterval(pressInterval);
+}
+
+// Kiểm tra Reset bằng chuột khi nhấp nhanh 2 nút trong vòng 0.3s
+// マウス操作用：0.3秒以内に両方のボタンがクリックされたらリセット
+function checkMouseReset(clickedType) {
+  const now = Date.now();
+  if (clickedType === 'min') {
+    lastMinClickTime = now;
+    if (now - lastSecClickTime < MOUSE_RESET_WINDOW) {
+      resetTimer();
+    }
+  } else if (clickedType === 'sec') {
+    lastSecClickTime = now;
+    if (now - lastMinClickTime < MOUSE_RESET_WINDOW) {
+      resetTimer();
+    }
+  }
+}
+
+// ==========================================
+// 4. ĐĂNG KÝ SỰ KIỆN TƯƠNG TÁC / イベントリスナー
+// ==========================================
+
+// Sự kiện chuột cho nút MIN / 「分」ボタンのマウスイベント
+minBtn.addEventListener('mousedown', (e) => {
+  if (e.button !== 0) return; // Chỉ nhận chuột trái / 左クリックのみ検知
+  checkMouseReset('min');
+  startLongPressCounter('min');
+});
+
+// Sự kiện chuột cho nút SEC / 「秒」ボタンのマウスイベント
+secBtn.addEventListener('mousedown', (e) => {
+  if (e.button !== 0) return;
+  checkMouseReset('sec');
+  startLongPressCounter('sec');
+});
+
+// Sự kiện thả chuột chung / マウスを離した時の処理
+window.addEventListener('mouseup', stopLongPressCounter);
+
+// Hỗ trợ sự kiện cảm ứng trên Điện thoại (Smartphone) / スマホのタッチ操作対応
+minBtn.addEventListener('touchstart', (e) => {
+  e.preventDefault();
+  startLongPressCounter('min');
+});
+secBtn.addEventListener('touchstart', (e) => {
+  e.preventDefault();
+  startLongPressCounter('sec');
+});
+window.addEventListener('touchend', stopLongPressCounter);
+
+// Sự kiện nút điều khiển Start/Stop / スタートボタンのクリックイベント
+startStopBtn.addEventListener('click', toggleStartStop);
+
+
+// ==========================================
+// 5. XỬ LÝ PHÍM TẮT BÀN PHÍM / キーボードショートカット
+// ==========================================
+
+window.addEventListener('keydown', (e) => {
+  const key = e.key.toLowerCase();
+  
+  // Tránh việc trình duyệt tự động lặp lại sự kiện keydown mặc định
+  // キーの押しっぱなしによるブラウザ標準の連打イベントを防止
+  if (e.repeat && (key === 'q' || key === 'w')) return;
+
+  activeKeys[key] = true;
+
+  // CHẾ ĐỘ RESET: Nhấn đồng thời cả 2 phím Q và W
+  // キーボードでのリセット：QとWの同時押し
+  if (activeKeys['q'] && activeKeys['w']) {
+    stopLongPressCounter();
+    resetTimer();
+    minBtn.classList.add('active-click');
+    secBtn.classList.add('active-click');
+    return;
+  }
+
+  // Phím Q - Tăng phút / Qキー：分追加
+  if (key === 'q' && !activeKeys['w']) {
+    minBtn.classList.add('active-click');
+    startLongPressCounter('min');
+  }
+  
+  // Phím W - Tăng giây / Wキー：秒追加
+  if (key === 'w' && !activeKeys['q']) {
+    secBtn.classList.add('active-click');
+    startLongPressCounter('sec');
+  }
+
+  // Phím E - Khởi động / Dừng / Eキー：スタート・ストップ
+  if (key === 'e') {
+    startStopBtn.classList.add('active-click');
+    toggleStartStop();
+  }
+});
+
+window.addEventListener('keyup', (e) => {
+  const key = e.key.toLowerCase();
+  activeKeys[key] = false;
+
+  if (key === 'q') {
+    minBtn.classList.remove('active-click');
+    stopLongPressCounter();
+  }
+  if (key === 'w') {
+    secBtn.classList.remove('active-click');
+    stopLongPressCounter();
+  }
+  if (key === 'e') {
+    startStopBtn.classList.remove('active-click');
+  }
+});
+
+// Khởi tạo hiển thị màn hình lúc ban đầu / 初期表示の実行
+updateDisplay();
