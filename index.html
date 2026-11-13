@@ -1,4 +1,201 @@
-<div class="timer-container">
+<!DOCTYPE html>
+<html lang="en">
+
+  <head>
+    <meta charset="UTF-8">
+    <title>Kitchen timer</title>
+    <style>
+@font-face {
+  font-family: "DSEG7-Classic";
+  src: url("https://cdn.jsdelivr.net/npm/dseg/fonts/DSEG7-Classic/DSEG7Classic-Regular.woff2") format("woff2");
+  font-weight: normal;
+  font-style: normal;
+}
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  background-color: #e0e0e0;
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  padding: 20px;
+}
+
+.timer-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+  max-width: 340px;
+}
+
+.reset-bridge {
+  align-self: flex-start;
+  margin-left: 35px;
+  width: 90px;
+  margin-bottom: 12px;
+  text-align: center;
+}
+.reset-bridge .reset-text {
+  font-size: 11px;
+  color: #888;
+  font-weight: bold;
+  letter-spacing: 0.5px;
+}
+.reset-bridge .bridge-line {
+  height: 2px;
+  background: #555555;
+  margin-top: 4px;
+  position: relative;
+}
+.reset-bridge .bridge-line::before, .reset-bridge .bridge-line::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  width: 2px;
+  height: 6px;
+  background: #555555;
+}
+.reset-bridge .bridge-line::before {
+  left: 0;
+}
+.reset-bridge .bridge-line::after {
+  right: 0;
+}
+
+.kitchen-timer {
+  width: 300px;
+  height: 300px;
+  background-color: #1a1a1a;
+  border-radius: 36px;
+  padding: 25px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  align-items: center;
+  box-shadow: 15px 15px 30px rgba(0, 0, 0, 0.4), -10px -10px 20px rgba(255, 255, 255, 0.6), inset 2px 2px 5px rgba(255, 255, 255, 0.15), inset -2px -2px 5px rgba(0, 0, 0, 0.7);
+  position: relative;
+}
+
+.brand-logo {
+  color: #d4af37;
+  font-weight: 900;
+  font-size: 18px;
+  letter-spacing: 3px;
+  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.8);
+  margin-top: 5px;
+}
+
+.lcd-display {
+  width: 100%;
+  height: 85px;
+  background-color: #243224;
+  border-radius: 12px;
+  position: relative;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  border: 4px solid #111;
+  box-shadow: inset 4px 4px 8px rgba(0, 0, 0, 0.8);
+  overflow: hidden;
+}
+.lcd-display.flash-active {
+  animation: lcd-blink 0.4s infinite alternate;
+}
+
+.lcd-bg-digits, .lcd-time {
+  font-family: "DSEG7-Classic", monospace;
+  font-size: 48px;
+  letter-spacing: 2px;
+  position: absolute;
+  user-select: none;
+}
+
+.lcd-bg-digits {
+  color: rgba(51, 255, 51, 0.06);
+}
+
+.lcd-time {
+  color: #33ff33;
+  text-shadow: 0 0 10px rgba(51, 255, 51, 0.6);
+}
+
+.button-group {
+  display: flex;
+  justify-content: space-between;
+  width: 100%;
+  gap: 15px;
+  margin-bottom: 5px;
+}
+
+.timer-btn {
+  flex: 1;
+  height: 65px;
+  background: #2b2b2b;
+  color: #ffffff;
+  border: none;
+  border-radius: 16px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  cursor: pointer;
+  box-shadow: 0 5px 0 #000, 3px 6px 10px rgba(0, 0, 0, 0.5), inset 1px 1px 2px rgba(255, 255, 255, 0.1);
+  transition: all 0.1s ease;
+  position: relative;
+}
+.timer-btn:active, .timer-btn.active-click {
+  transform: translateY(4px);
+  box-shadow: 0 1px 0 #000, 1px 2px 5px rgba(0, 0, 0, 0.5);
+}
+.timer-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none !important;
+  box-shadow: 0 5px 0 #000, 3px 6px 10px rgba(0, 0, 0, 0.5) !important;
+}
+.timer-btn .btn-label {
+  font-size: 14px;
+  font-weight: bold;
+  letter-spacing: 1px;
+}
+.timer-btn .shortcut-key {
+  font-size: 10px;
+  color: #888;
+  margin-top: 2px;
+  font-weight: bold;
+  background: rgba(0, 0, 0, 0.3);
+  padding: 1px 5px;
+  border-radius: 4px;
+}
+
+.btn-start-stop {
+  background: #3a5fcd;
+}
+.btn-start-stop:active, .btn-start-stop.active-click {
+  background: #2b4bb7;
+}
+
+@keyframes lcd-blink {
+  0% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0.1;
+  }
+}
+    </style>
+
+  </head>
+    
+  <body>
+  <div class="timer-container">
   <!-- Thân máy đồng hồ / タイマーの本体 -->
   <div class="kitchen-timer">
     
@@ -35,226 +232,7 @@
 
   </div>
 </div>
-
-// Tải Font DSEG7 từ CDN để hiển thị số điện tử
-@font-face {
-  font-family: 'DSEG7-Classic';
-  src: url('https://cdn.jsdelivr.net/npm/dseg/fonts/DSEG7-Classic/DSEG7Classic-Regular.woff2') format('woff2');
-  font-weight: normal;
-  font-style: normal;
-}
-
-// Định nghĩa màu sắc / カラー変数
-$body-bg: #e0e0e0;
-$timer-body-color: #1a1a1a; // Màu đen hiện đại
-$lcd-bg-color: #243224;     // Màu nền xanh LCD mờ
-$lcd-text-color: #33ff33;   // Màu LED xanh sáng
-$lcd-bg-digits-color: rgba(51, 255, 51, 0.06); // Số mờ phía sau
-$btn-bg: #2b2b2b;
-$btn-text: #ffffff;
-$accent-line: #555555;
-
-* {
-  box-sizing: border-box;
-  margin: 0;
-  padding: 0;
-}
-
-body {
-  background-color: $body-bg;
-  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  min-height: 100vh;
-  padding: 20px;
-}
-
-.timer-container {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  width: 100%;
-  max-width: 340px;
-}
-
-// Đường kẻ và hướng dẫn Reset / リセットの案内線
-.reset-bridge {
-  align-self: flex-start;
-  margin-left: 35px;            // Tọa độ căn giữa chuẩn xác theo tâm của 2 nút
-  width: 90px;
-  margin-bottom: 12px;
-  text-align: center;
-  
-  .reset-text {
-    font-size: 11px;
-    color: #888;
-    font-weight: bold;
-    letter-spacing: 0.5px;
-  }
-
-  .bridge-line {
-    height: 2px;
-    background: $accent-line;
-    margin-top: 4px;
-    position: relative;
-
-    &::before, &::after {
-      content: '';
-      position: absolute;
-      top: 0;
-      width: 2px;
-      height: 6px;
-      background: $accent-line;
-    }
-    &::before { left: 0; }
-    &::after { right: 0; }
-  }
-}
-
-// Thân máy đồng hồ hình vuông bo tròn (Skeuomorphism)
-.kitchen-timer {
-  width: 300px;
-  height: 300px;
-  background-color: $timer-body-color;
-  border-radius: 36px;
-  padding: 25px;
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-  align-items: center;
-  
-  // Đổ bóng đa tầng tạo chiều sâu chân thật
-  box-shadow: 
-    15px 15px 30px rgba(0, 0, 0, 0.4), 
-    -10px -10px 20px rgba(255, 255, 255, 0.6),
-    inset 2px 2px 5px rgba(255, 255, 255, 0.15),
-    inset -2px -2px 5px rgba(0, 0, 0, 0.7);
-  position: relative;
-}
-
-// Logo mang thương hiệu riêng
-.brand-logo {
-  color: #d4af37; // Màu vàng kim giả kim loại
-  font-weight: 900;
-  font-size: 18px;
-  letter-spacing: 3px;
-  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.8);
-  margin-top: 5px;
-}
-
-// Màn hình hiển thị LCD nhị phân
-.lcd-display {
-  width: 100%;
-  height: 85px;
-  background-color: $lcd-bg-color;
-  border-radius: 12px;
-  position: relative;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  border: 4px solid #111;
-  box-shadow: inset 4px 4px 8px rgba(0, 0, 0, 0.8);
-  overflow: hidden;
-
-  // Hiệu ứng nhấp nháy khi kết thúc / 終了時の点滅アニメーション
-  &.flash-active {
-    animation: lcd-blink 0.4s infinite alternate;
-  }
-}
-
-.lcd-bg-digits, .lcd-time {
-  font-family: 'DSEG7-Classic', monospace;
-  font-size: 48px;
-  letter-spacing: 2px;
-  position: absolute;
-  user-select: none;
-}
-
-.lcd-bg-digits {
-  color: $lcd-bg-digits-color;
-}
-
-.lcd-time {
-  color: $lcd-text-color;
-  text-shadow: 0 0 10px rgba(51, 255, 51, 0.6);
-}
-
-// Khu vực các nút bấm lớn
-.button-group {
-  display: flex;
-  justify-content: space-between;
-  width: 100%;
-  gap: 15px;
-  margin-bottom: 5px;
-}
-
-// Thiết kế nút bấm nổi khối cơ học
-.timer-btn {
-  flex: 1;
-  height: 65px;
-  background: $btn-bg;
-  color: $btn-text;
-  border: none;
-  border-radius: 16px;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-  cursor: pointer;
-  box-shadow: 
-    0 5px 0 #000, 
-    3px 6px 10px rgba(0, 0, 0, 0.5),
-    inset 1px 1px 2px rgba(255, 255, 255, 0.1);
-  transition: all 0.1s ease;
-  position: relative;
-
-  &:active, &.active-click {
-    transform: translateY(4px);
-    box-shadow: 
-      0 1px 0 #000, 
-      1px 2px 5px rgba(0, 0, 0, 0.5);
-  }
-
-  &:disabled {
-    opacity: 0.6;
-    cursor: not-allowed;
-    transform: none !important;
-    box-shadow: 0 5px 0 #000, 3px 6px 10px rgba(0, 0, 0, 0.5) !important;
-  }
-
-  .btn-label {
-    font-size: 14px;
-    font-weight: bold;
-    letter-spacing: 1px;
-  }
-
-  .shortcut-key {
-    font-size: 10px;
-    color: #888;
-    margin-top: 2px;
-    font-weight: bold;
-    background: rgba(0,0,0,0.3);
-    padding: 1px 5px;
-    border-radius: 4px;
-  }
-}
-
-// Tạo điểm nhấn khác biệt cho nút Start/Stop
-.btn-start-stop {
-  background: #3a5fcd;
-  
-  &:active, &.active-click {
-    background: #2b4bb7;
-  }
-}
-
-// Định nghĩa hiệu ứng chớp tắt màn hình LCD
-@keyframes lcd-blink {
-  0% { opacity: 1; }
-  100% { opacity: 0.1; }
-}
-
+    <script>
 // ==========================================
 // 1. QUẢN LÝ TRẠNG THÁI / 状態管理（じょうたいかんり）
 // ==========================================
@@ -581,3 +559,8 @@ window.addEventListener('keyup', (e) => {
 
 // Khởi tạo hiển thị màn hình lúc ban đầu / 初期表示の実行
 updateDisplay();
+    </script>
+
+  </body>
+  
+</html>
